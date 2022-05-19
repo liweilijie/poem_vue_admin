@@ -7,18 +7,18 @@
       v-show="showSearch"
       label-width="68px"
     >
-      <el-form-item label="药品编码" prop="post_code">
+      <el-form-item label="药品名称" prop="name">
         <el-input
-          v-model="queryParams.post_code"
-          placeholder="请输入药品编码"
+          v-model="queryParams.name"
+          placeholder="请输入药品名称"
           clearable
           @keyup.enter="getList"
         />
       </el-form-item>
-      <el-form-item label="药品名称" prop="post_name">
+      <el-form-item label="药品类目" prop="category_id">
         <el-input
-          v-model="queryParams.post_name"
-          placeholder="请输入药品名称"
+          v-model="queryParams.category_id"
+          placeholder="请输入药品类目名称"
           clearable
           @keyup.enter="getList"
         />
@@ -52,7 +52,7 @@
           plain
           icon="Plus"
           @click="handleAdd"
-          v-hasPermi="['system/post/add']"
+          v-hasPermi="['his/medicinal/add']"
           >新增</el-button
         >
       </el-col>
@@ -63,7 +63,7 @@
           icon="Edit"
           :disabled="single"
           @click="handleUpdate"
-          v-hasPermi="['system/post/edit']"
+          v-hasPermi="['his/medicinal/edit']"
           >修改</el-button
         >
       </el-col>
@@ -74,7 +74,7 @@
           icon="Delete"
           :disabled="multiple"
           @click="handleDelete"
-          v-hasPermi="['system/post/delete']"
+          v-hasPermi="['his/medicinal/delete']"
           >删除</el-button
         >
       </el-col>
@@ -107,9 +107,10 @@
         show-overflow-tooltip
         prop="post_id"
       />
-      <el-table-column label="药品编码" align="center" prop="post_code" />
-      <el-table-column label="药品名称" align="center" prop="post_name" />
-      <el-table-column label="药品排序" align="center" prop="post_sort" />
+      <el-table-column label="药品名称" align="center" prop="name" />
+      <el-table-column label="药品编码" align="center" prop="batch_number" />
+      <el-table-column label="药品规格" align="center" prop="spec" />
+      <el-table-column label="有效期" align="center" prop="validity" />
       <el-table-column label="状态" align="center" prop="status">
         <template #default="scope">
           <dict-tag :options="sys_normal_disable" :value="scope.row.status" />
@@ -129,21 +130,21 @@
         label="操作"
         align="center"
         class-name="small-padding fixed-width"
-        v-hasPermi="['system/post/delete', 'system/post/edit']"
+        v-hasPermi="['his/medicinal/delete', 'his/medicinal/edit']"
       >
         <template #default="scope">
           <el-button
             type="text"
             icon="Edit"
             @click="handleUpdate(scope.row)"
-            v-hasPermi="['system/post/edit']"
+            v-hasPermi="['his/medicinal/edit']"
             >修改</el-button
           >
           <el-button
             type="text"
             icon="Delete"
             @click="handleDelete(scope.row)"
-            v-hasPermi="['system/post/delete']"
+            v-hasPermi="['his/medicinal/delete']"
             >删除</el-button
           >
         </template>
@@ -161,18 +162,17 @@
     <!-- 添加或修改药品对话框 -->
     <el-dialog :title="title" v-model="open" width="500px" append-to-body>
       <el-form ref="postRef" :model="form" :rules="rules" label-width="80px">
-        <el-form-item label="药品名称" prop="post_name">
-          <el-input v-model="form.post_name" placeholder="请输入药品名称" />
+        <el-form-item label="药品名称" prop="name">
+          <el-input v-model="form.name" placeholder="请输入药品名称" />
         </el-form-item>
-        <el-form-item label="药品编码" prop="post_code">
-          <el-input v-model="form.post_code" placeholder="请输入编码名称" />
+        <el-form-item label="药品编码" prop="batch_number">
+          <el-input v-model="form.batch_number" placeholder="请输入编码名称" />
         </el-form-item>
-        <el-form-item label="药品顺序" prop="post_sort">
-          <el-input-number
-            v-model="form.post_sort"
-            controls-position="right"
-            :min="0"
-          />
+        <el-form-item label="药品规格" prop="spec">
+          <el-input v-model="form.spec" placeholder="请输入药品规格" />
+        </el-form-item>
+        <el-form-item label="有效期" prop="validity">
+          <el-input v-model="form.validity" placeholder="请输入药品有效期" />
         </el-form-item>
         <el-form-item label="药品状态" prop="status">
           <el-radio-group v-model="form.status">
@@ -183,13 +183,6 @@
               >{{ dict.label }}</el-radio
             >
           </el-radio-group>
-        </el-form-item>
-        <el-form-item label="备注" prop="remark">
-          <el-input
-            v-model="form.remark"
-            type="textarea"
-            placeholder="请输入内容"
-          />
         </el-form-item>
       </el-form>
       <template #footer>
@@ -205,12 +198,12 @@
 <script setup name="Post">
 import { getCurrentInstance,ref,toRefs,reactive } from 'vue';
 import {
-  listPost,
-  addPost,
-  delPost,
-  getPost,
-  updatePost,
-} from '@/api/system/post';
+  listMedicinal,
+  addMedicinal,
+  delMedicinal,
+  getMedicinal,
+  updateMedicinal,
+} from '@/api/his/medicinal';
 
 const { proxy } = getCurrentInstance();
 const { sys_normal_disable } = proxy.useDict('sys_normal_disable');
@@ -220,7 +213,7 @@ const open = ref(false);
 const loading = ref(true);
 const showSearch = ref(true);
 const ids = ref([]);
-const post_names = ref([]);
+const medicinal_names = ref([]);
 const single = ref(true);
 const multiple = ref(true);
 const total = ref(0);
@@ -236,11 +229,11 @@ const data = reactive({
     status: undefined,
   },
   rules: {
-    post_name: [
+    name: [
       { required: true, message: '药品名称不能为空', trigger: 'blur' },
     ],
-    post_code: [
-      { required: true, message: '药品编码不能为空', trigger: 'blur' },
+    validity: [
+      { required: true, message: '药品有效期不能为空', trigger: 'blur' },
     ],
     post_sort: [
       { required: true, message: '药品顺序不能为空', trigger: 'blur' },
@@ -253,7 +246,7 @@ const { queryParams, form, rules } = toRefs(data);
 /** 查询药品列表 */
 async function getList() {
   loading.value = true;
-  const response = await listPost(queryParams.value);
+  const response = await listMedicinal(queryParams.value);
   postList.value = response.list;
   total.value = response.total;
   loading.value = false;
@@ -266,12 +259,13 @@ function cancel() {
 /** 表单重置 */
 function reset() {
   form.value = {
-    post_id: undefined,
-    post_code: undefined,
-    post_name: undefined,
-    post_sort: 0,
+    id: undefined,
+    name: undefined,
+    batch_number: undefined,
+    spec: undefined,
+    count: undefined,
+    validity: undefined,
     status: '1',
-    remark: undefined,
   };
   proxy.resetForm('postRef');
 }
@@ -284,8 +278,8 @@ const resetQuery = async () => {
 };
 /** 多选框选中数据 */
 function handleSelectionChange(selection) {
-  ids.value = selection.map((item) => item.post_id);
-  post_names.value = selection.map((item) => item.post_name);
+  ids.value = selection.map((item) => item.id);
+  medicinal_names.value = selection.map((item) => item.name);
   single.value = selection.length != 1;
   multiple.value = !selection.length;
 }
@@ -298,8 +292,8 @@ function handleAdd() {
 /** 修改按钮操作 */
 async function handleUpdate(row) {
   reset();
-  const post_id = row.post_id || ids.value[0];
-  const response = await getPost({ post_id });
+  const post_id = row.id || ids.value[0];
+  const response = await getMedicinal({ post_id });
   form.value = response;
   open.value = true;
   title.value = '修改药品';
@@ -326,8 +320,8 @@ function submitForm() {
 }
 /** 删除按钮操作 */
 function handleDelete(row) {
-  const post_ids = row.post_id ? [row.post_id] : ids.value;
-  const postNames = row.post_id ? row.post_name : post_names.value;
+  const post_ids = row.id ? [row.id] : ids.value;
+  const postNames = row.id ? row.name: medicinal_names.value;
   proxy.$modal
     .confirm('是否确认删除药品编号为"' + postNames + '"的数据项？')
     .then(function () {
@@ -342,7 +336,7 @@ function handleDelete(row) {
 /** 导出按钮操作 */
 function handleExport() {
   proxy.download(
-    'system/post/export',
+    'his/medicinal/export',
     {
       ...queryParams.value,
     },
