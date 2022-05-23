@@ -15,13 +15,19 @@
           @keyup.enter="getList"
         />
       </el-form-item>
-      <el-form-item label="药品类目" prop="category_id">
-        <el-input
-          v-model="queryParams.category_id"
-          placeholder="请输入药品类目名称"
-          clearable
-          @keyup.enter="getList"
-        />
+      <el-form-item label="药箱" prop="category_name">
+        <el-select
+            v-model="queryParams.category_name"
+            placeholder="药箱名称"
+            clearable
+        >
+          <el-option
+              v-for="dict in listCategory"
+              :key="dict.value"
+              :label="dict.label"
+              :value="dict.value"
+          />
+        </el-select>
       </el-form-item>
       <el-form-item label="状态" prop="status">
         <el-select
@@ -84,7 +90,7 @@
           plain
           icon="Download"
           @click="handleExport"
-          v-hasPermi="['system/post/export']"
+          v-hasPermi="['his/medicinal/export']"
           >导出</el-button
         >
       </el-col>
@@ -101,11 +107,11 @@
     >
       <el-table-column type="selection" width="55" align="center" />
       <el-table-column
-        label="药品编号"
+        label="药箱"
         align="center"
         width="100"
         show-overflow-tooltip
-        prop="post_id"
+        prop="category_name"
       />
       <el-table-column label="药品名称" align="center" prop="name" />
       <el-table-column label="药品编码" align="center" prop="batch_number" />
@@ -165,6 +171,9 @@
         <el-form-item label="药品名称" prop="name">
           <el-input v-model="form.name" placeholder="请输入药品名称" />
         </el-form-item>
+        <el-form-item label="药箱" prop="category_name">
+          <el-input v-model="form.category_name" placeholder="请输入药箱" />
+        </el-form-item>
         <el-form-item label="药品编码" prop="batch_number">
           <el-input v-model="form.batch_number" placeholder="请输入编码名称" />
         </el-form-item>
@@ -204,6 +213,7 @@ import {
   getMedicinal,
   updateMedicinal,
 } from '@/api/his/medicinal';
+import { listCategory } from "@/api/his/category";
 
 const { proxy } = getCurrentInstance();
 const { sys_normal_disable } = proxy.useDict('sys_normal_disable');
@@ -212,7 +222,7 @@ const postList = ref([]);
 const open = ref(false);
 const loading = ref(true);
 const showSearch = ref(true);
-const ids = ref([]);
+const med_ids = ref([]);
 const medicinal_names = ref([]);
 const single = ref(true);
 const multiple = ref(true);
@@ -278,7 +288,7 @@ const resetQuery = async () => {
 };
 /** 多选框选中数据 */
 function handleSelectionChange(selection) {
-  ids.value = selection.map((item) => item.id);
+  med_ids.value = selection.map((item) => item.id);
   medicinal_names.value = selection.map((item) => item.name);
   single.value = selection.length != 1;
   multiple.value = !selection.length;
@@ -292,8 +302,8 @@ function handleAdd() {
 /** 修改按钮操作 */
 async function handleUpdate(row) {
   reset();
-  const post_id = row.id || ids.value[0];
-  const response = await getMedicinal({ post_id });
+  const id = row.id || med_ids.value[0];
+  const response = await getMedicinal({ id });
   form.value = response;
   open.value = true;
   title.value = '修改药品';
@@ -302,14 +312,14 @@ async function handleUpdate(row) {
 function submitForm() {
   proxy.$refs['postRef'].validate((valid) => {
     if (valid) {
-      if (form.value.post_id != undefined) {
-        updatePost(form.value).then((response) => {
+      if (form.value.id != undefined) {
+        updateMedicinal(form.value).then((response) => {
           proxy.$modal.msgSuccess('修改成功');
           open.value = false;
           getList();
         });
       } else {
-        addPost(form.value).then((response) => {
+        addMedicinal(form.value).then((response) => {
           proxy.$modal.msgSuccess('新增成功');
           open.value = false;
           getList();
@@ -320,12 +330,12 @@ function submitForm() {
 }
 /** 删除按钮操作 */
 function handleDelete(row) {
-  const post_ids = row.id ? [row.id] : ids.value;
+  const ids = row.id ? [row.id] : med_ids.value;
   const postNames = row.id ? row.name: medicinal_names.value;
   proxy.$modal
     .confirm('是否确认删除药品编号为"' + postNames + '"的数据项？')
     .then(function () {
-      return delPost({ post_ids });
+      return delMedicinal({ ids });
     })
     .then(() => {
       getList();
