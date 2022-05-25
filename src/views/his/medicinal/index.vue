@@ -274,6 +274,7 @@ import {
   updateMedicinal,
 } from '@/api/his/medicinal';
 import { listCategory } from "@/api/his/category";
+import { getToken } from '@/utils/auth'
 
 const { proxy } = getCurrentInstance();
 const { sys_normal_disable } = proxy.useDict('sys_normal_disable');
@@ -303,7 +304,7 @@ const upload = reactive({
   // 设置上传的请求头部
   headers: { Authorization: 'Bearer ' + getToken() },
   // 上传的地址
-  url: import.meta.env.VITE_APP_BASE_API + 'his/medicinal/import',
+  url: import.meta.env.VITE_APP_BASE_API + '/his/medicinal/import',
 });
 
 const data = reactive({
