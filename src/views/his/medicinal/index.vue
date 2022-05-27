@@ -32,7 +32,7 @@
           clearable
         >
           <el-option
-            v-for="dict in sys_normal_disable"
+            v-for="dict in medicinal_status"
             :key="dict.value"
             :label="dict.label"
             :value="dict.value"
@@ -115,7 +115,7 @@
       <el-table-column
         label="药箱"
         align="center"
-        width="100"
+        width="180"
         show-overflow-tooltip
         prop="category_name"
       />
@@ -125,7 +125,7 @@
       <el-table-column label="有效期" align="center" prop="validity" />
       <el-table-column label="状态" align="center" prop="status">
         <template #default="scope">
-          <dict-tag :options="sys_normal_disable" :value="scope.row.status" />
+          <dict-tag :options="medicinal_status" :value="scope.row.status" />
         </template>
       </el-table-column>
       <el-table-column
@@ -199,7 +199,7 @@
         <el-form-item label="药品状态" prop="status">
           <el-radio-group v-model="form.status">
             <el-radio
-              v-for="dict in sys_normal_disable"
+              v-for="dict in medicinal_status"
               :key="dict.value"
               :label="dict.value"
               >{{ dict.label }}</el-radio
@@ -225,7 +225,7 @@
       <el-upload
         ref="uploadRef"
         :limit="1"
-        accept=".xlsx, .xls"
+        accept=".csv, .xlsx, .xls"
         :headers="upload.headers"
         :action="upload.url + '?updateSupport=' + upload.updateSupport"
         :disabled="upload.isUploading"
@@ -243,7 +243,7 @@
                 v-model="upload.updateSupport"
               />是否更新已经存在的用户数据
             </div>
-            <span>仅允许导入xls、xlsx格式文件。</span>
+            <span>仅允许导入csv,xls、xlsx格式文件。</span>
             <el-link
               type="primary"
               :underline="false"
@@ -277,7 +277,7 @@ import { listCategory } from "@/api/his/category";
 import { getToken } from '@/utils/auth'
 
 const { proxy } = getCurrentInstance();
-const { sys_normal_disable } = proxy.useDict('sys_normal_disable');
+const { medicinal_status } = proxy.useDict('medicinal_status');
 
 const postList = ref([]);
 const open = ref(false);
@@ -311,7 +311,7 @@ const data = reactive({
   form: {},
   queryParams: {
     page_num: 1,
-    page_size: 3,
+    page_size: 10,
     post_code: undefined,
     post_name: undefined,
     status: undefined,
