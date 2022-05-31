@@ -1,8 +1,8 @@
 {
-  "name": "LingDu",
+  "name": "Medicinal",
   "version": "0.0.1",
-  "description": "LingDu管理系统",
-  "author": "LingDu",
+  "description": "药品后台管理系统",
+  "author": "LiWei",
   "license": "MIT",
   "scripts": {
     "dev": "vite",

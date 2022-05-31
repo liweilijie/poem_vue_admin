@@ -6,22 +6,20 @@
             <template #header>
               <div class="card-header">
                 <span style="font-size: 22px; font-weight: bold; color: red"
-                  >LingDu后台管理框架</span
+                  >药品后台管理系统</span
                 >
               </div>
             </template>
             <el-col style="padding-left: 10px">
             <h3><b>简介</b></h3>
               <p>
-                以 若依Vue3 作为前端基础开发的，后端以poem为框架进行开发；
-                目标是简单实用的单机程序，缓存采用本机内存缓存，不采用redis缓存，
+                以 Rust 做后台开发的一个药疗仓储管理系统；
+                目标是为王果蓉同学做药物统计和告警功能, 如果有问题请及时联系开发人员，并将问题拍照存证.
               </p>
               <h3><b>技术依赖</b></h3>
-              后端语言：<a href="https://www.rust-lang.org/">rust</a> <br/>
-              后端框架：<a href="https://github.com/poem-web/poem">poem</a> <br/>
+              后端语言：Rust <br/>
               <br/>
-              前端框架：<a href="https://vuejs.org/">vue</a> <br/>
-              基础框架：<a href="https://github.com/yangzongzhuan/RuoYi-Vue3">若依Vue3</a>
+              前端框架：vue <br/>
               <p>
                 <b>当前版本:</b> <span>v{{ version }}</span>
               </p>
@@ -32,15 +30,15 @@
                   icon="Cloudy"
                   plain
                   @click="
-                    goTarget('https://github.com/yangzongzhuan/RuoYi-Vue3')
+                    goTarget('#')
                   "
-                  >访问 若依Vue3</el-button
+                  >访问 首页</el-button
                 >
                 <el-button
                   icon="HomeFilled"
                   plain
-                  @click="goTarget('https://github.com/poem-web/poem')"
-                  >访问 Poem</el-button
+                  @click="goTarget('#')"
+                  >访问 </el-button
                 >
               </p>
             </el-col>
